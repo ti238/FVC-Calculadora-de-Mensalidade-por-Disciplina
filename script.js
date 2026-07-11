@@ -1,70 +1,251 @@
-const cursos={enfermagem:{nome:'Enfermagem',mensalidade:1307.19,parcelas:6,cargaHoraria:4000,bolsa:15,pontualidade:5},fonoaudiologia:{nome:'Fonoaudiologia',mensalidade:1561.66,parcelas:6,cargaHoraria:3600,bolsa:10,pontualidade:5},psicologia:{nome:'Psicologia',mensalidade:1420.50,parcelas:6,cargaHoraria:4000,bolsa:12,pontualidade:5},medicinaVeterinaria:{nome:'Medicina Veterinária',mensalidade:2890.00,parcelas:6,cargaHoraria:4500,bolsa:8,pontualidade:7},odontologia:{nome:'Odontologia',mensalidade:3200.00,parcelas:6,cargaHoraria:4800,bolsa:10,pontualidade:5},nutricao:{nome:'Nutrição',mensalidade:1250.00,parcelas:6,cargaHoraria:3800,bolsa:15,pontualidade:5}};
-const selectCurso=document.getElementById('selectCurso');
-const inputChTotalCurso=document.getElementById('chTotalCurso');
-const inputChDisciplina=document.getElementById('chDisciplina');
-const inputQtdParcelas=document.getElementById('qtdParcelas');
-const inputMensalidadeIntegral=document.getElementById('mensalidadeIntegral');
-const inputBolsaIncentivo=document.getElementById('bolsaIncentivo');
-const inputDescontoPontualidade=document.getElementById('descontoPontualidade');
-const btnCalcular=document.getElementById('btnCalcular');
-const btnLimpar=document.getElementById('btnLimpar');
-const formCalculadora=document.getElementById('formCalculadora');
-const mensagemErro=document.getElementById('mensagemErro');
-const cardResultado=document.getElementById('cardResultado');
-const badgeStatus=document.getElementById('badgeStatus');
-const spinnerLoading=document.getElementById('spinnerLoading');
-const iconCalcular=document.getElementById('iconCalcular');
-const resCurso=document.getElementById('resCurso');
-const resChCurso=document.getElementById('resChCurso');
-const resChDisciplina=document.getElementById('resChDisciplina');
-const resValorHora=document.getElementById('resValorHora');
-const resMensalidadeIntegral=document.getElementById('resMensalidadeIntegral');
-const resValorBolsa=document.getElementById('resValorBolsa');
-const resMensalidadeAposBolsa=document.getElementById('resMensalidadeAposBolsa');
-const resDescontoPontualidade=document.getElementById('resDescontoPontualidade');
-const resValorLiquido=document.getElementById('resValorLiquido');
-const resValorTotalDisciplina=document.getElementById('resValorTotalDisciplina');
-const resNumParcelas=document.getElementById('resNumParcelas');
-const resValorPorParcela=document.getElementById('resValorPorParcela');
-const campos=[inputChTotalCurso,inputChDisciplina,inputQtdParcelas,inputMensalidadeIntegral,inputBolsaIncentivo,inputDescontoPontualidade];
-document.addEventListener('DOMContentLoaded',inicializarAplicacao);
-function inicializarAplicacao(){selectCurso.addEventListener('change',tratarSelecaoCurso);btnCalcular.addEventListener('click',executarFluxoCalculo);btnLimpar.addEventListener('click',limparFormulario);campos.forEach(campo=>{campo.addEventListener('input',tratarAlteracaoCampo);campo.addEventListener('change',tratarAlteracaoCampo)});resetarDemonstrativoVisual()}
-function tratarSelecaoCurso(){const cursoChave=selectCurso.value;const cursoDados=cursos[cursoChave];if(!cursoDados){limparCamposCurso();resetarDemonstrativoVisual();return}inputChTotalCurso.value=cursoDados.cargaHoraria;inputChDisciplina.value='';inputQtdParcelas.value=cursoDados.parcelas;inputMensalidadeIntegral.value=cursoDados.mensalidade;inputBolsaIncentivo.value=cursoDados.bolsa;inputDescontoPontualidade.value=cursoDados.pontualidade;inputChDisciplina.focus();if(inputChDisciplina.value){executarFluxoCalculo(false)}else{resetarDemonstrativoVisual()}}
-function tratarAlteracaoCampo(){limparMensagemErro();if(!selectCurso.value){resetarDemonstrativoVisual();return}const camposPreenchidos=campos.every(campo=>campo.value!=='');if(camposPreenchidos){executarFluxoCalculo(false)}else{resetarDemonstrativoVisual()}}
-function executarFluxoCalculo(exibirLoading=true){const validacao=validarFormulario();if(!validacao.valido){mensagemErro.textContent=validacao.mensagem;mensagemErro.classList.remove('d-none');resetarDemonstrativoVisual();return}mensagemErro.classList.add('d-none');if(exibirLoading){mostrarLoading(true);window.setTimeout(()=>{executarCalculosReais();mostrarLoading(false)},350);return}executarCalculosReais()}
-function validarFormulario(){const dados={curso:selectCurso.value,chTotalCurso:Number(inputChTotalCurso.value),chDisciplina:Number(inputChDisciplina.value),qtdParcelas:Number(inputQtdParcelas.value),mensalidadeIntegral:Number(inputMensalidadeIntegral.value),bolsaIncentivo:Number(inputBolsaIncentivo.value),descontoPontualidade:Number(inputDescontoPontualidade.value)};if(!dados.curso){return{valido:false,mensagem:'Selecione um curso para iniciar o cálculo.'}}if(!Number.isFinite(dados.chTotalCurso)||dados.chTotalCurso<=0){return{valido:false,mensagem:'Informe a carga horária total do curso.'}}if(!Number.isFinite(dados.chDisciplina)||dados.chDisciplina<=0){return{valido:false,mensagem:'Informe a carga horária da disciplina.'}}if(!Number.isFinite(dados.qtdParcelas)||dados.qtdParcelas<=0){return{valido:false,mensagem:'Informe a quantidade de parcelas.'}}if(!Number.isFinite(dados.mensalidadeIntegral)||dados.mensalidadeIntegral<0){return{valido:false,mensagem:'Informe a mensalidade integral corretamente.'}}if(!Number.isFinite(dados.bolsaIncentivo)||dados.bolsaIncentivo<0||dados.bolsaIncentivo>100){return{valido:false,mensagem:'A bolsa de incentivo deve estar entre 0% e 100%.'}}if(!Number.isFinite(dados.descontoPontualidade)||dados.descontoPontualidade<0||dados.descontoPontualidade>100){return{valido:false,mensagem:'O desconto de pontualidade deve estar entre 0% e 100%.'}}return{valido:true}}
-function executarCalculosReais(){const nomeCurso=selectCurso.options[selectCurso.selectedIndex]?.text||'Curso';const chTotalCurso=Number(inputChTotalCurso.value)||0;const chDisciplina=Number(inputChDisciplina.value)||0;const qtdParcelas=Number(inputQtdParcelas.value)||1;const mensalidadeIntegral=Number(inputMensalidadeIntegral.value)||0;const porcBolsa=Number(inputBolsaIncentivo.value)||0;const porcPontualidade=Number(inputDescontoPontualidade.value)||0;const valorHora=chTotalCurso>0?mensalidadeIntegral/chTotalCurso:0;const valorDisciplina=valorHora*chDisciplina;const valorBolsa=valorDisciplina*(porcBolsa/100);const valorAposBolsa=valorDisciplina-valorBolsa;const valorDescontoPontualidade=valorAposBolsa*(porcPontualidade/100);const valorLiquido=valorAposBolsa-valorDescontoPontualidade;const valorPorParcela=qtdParcelas>0?valorLiquido/qtdParcelas:valorLiquido;resCurso.textContent=nomeCurso;resChCurso.textContent=`${chTotalCurso} h`;resChDisciplina.textContent=`${chDisciplina} h`;resValorHora.textContent=formatarMoeda(valorHora);resMensalidadeIntegral.textContent=formatarMoeda(valorDisciplina);resValorBolsa.textContent=`- ${formatarMoeda(valorBolsa)} (${porcBolsa.toFixed(1)}%)`;resMensalidadeAposBolsa.textContent=formatarMoeda(valorAposBolsa);resDescontoPontualidade.textContent=`- ${formatarMoeda(valorDescontoPontualidade)} (${porcPontualidade.toFixed(1)}%)`;resValorLiquido.textContent=formatarMoeda(valorLiquido);resValorTotalDisciplina.textContent=formatarMoeda(valorLiquido);resNumParcelas.textContent=qtdParcelas;resValorPorParcela.textContent=formatarMoeda(valorPorParcela);cardResultado.classList.add('ativo');cardResultado.classList.remove('opacity-75');badgeStatus.textContent='Calculado';badgeStatus.className='badge bg-success px-2 py-1'}
-function formatarMoeda(valor){return valor.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
-function mostrarLoading(estado){spinnerLoading.classList.toggle('d-none',!estado);iconCalcular.classList.toggle('d-none',estado);btnCalcular.disabled=estado}
-function resetarDemonstrativoVisual(){cardResultado.classList.remove('ativo');cardResultado.classList.add('opacity-75');badgeStatus.textContent='Aguardando Cálculo';badgeStatus.className='badge bg-secondary-subtle text-secondary px-2 py-1';const elementosRes=[resCurso,resChCurso,resChDisciplina,resValorHora,resMensalidadeIntegral,resValorBolsa,resMensalidadeAposBolsa,resDescontoPontualidade,resValorLiquido,resValorTotalDisciplina,resNumParcelas,resValorPorParcela];elementosRes.forEach(elemento=>{elemento.textContent='-'})}
-function limparCamposCurso(){inputChTotalCurso.value='';inputChDisciplina.value='';inputQtdParcelas.value='';inputMensalidadeIntegral.value='';inputBolsaIncentivo.value='';inputDescontoPontualidade.value=''}
-function limparFormulario(){formCalculadora.reset();limparCamposCurso();limparMensagemErro();resetarDemonstrativoVisual()}
-function limparMensagemErro(){mensagemErro.textContent='';mensagemErro.classList.add('d-none')}
+/**
+ * BANCO DE DADOS DE CURSOS (Parametrizado conforme planilhas institucionais)
+ * Baseado em: Custo Semestral Base / Horas Matriz Semestre
+ */
+const cursos = {
+    odontologia: {
+        nome: "Odontologia",
+        mensalidade: 5044.11, // Valor Integral como base
+        horasSemestre: 400,   // Horas padrão do semestre
+        bolsaIncentivo: 40.0, // 0.4 na planilha (40%)
+        pontualidade: 10.0    // 10% padrão de DP
+    },
+    enfermagem: {
+        nome: "Enfermagem",
+        mensalidade: 3500.00,
+        horasSemestre: 400,
+        bolsaIncentivo: 30.0,
+        pontualidade: 10.0
+    },
+    fonoaudiologia: {
+        nome: "Fonoaudiologia",
+        mensalidade: 3800.00,
+        horasSemestre: 360,
+        bolsaIncentivo: 20.0,
+        pontualidade: 10.0
+    },
+    psicologia: {
+        nome: "Psicologia",
+        mensalidade: 4100.00,
+        horasSemestre: 400,
+        bolsaIncentivo: 25.0,
+        pontualidade: 10.0
+    },
+    medicinaVeterinaria: {
+        nome: "Medicina Veterinária",
+        mensalidade: 5800.00,
+        horasSemestre: 440,
+        bolsaIncentivo: 15.0,
+        pontualidade: 10.0
+    },
+    nutricao: {
+        nome: "Nutrição",
+        mensalidade: 3200.00,
+        horasSemestre: 380,
+        bolsaIncentivo: 30.0,
+        pontualidade: 10.0
+    }
+};
 
+// Captura de Elementos do DOM
+const selectCurso = document.getElementById('selectCurso');
+const inputMensalidadeIntegral = document.getElementById('mensalidadeIntegral');
+const inputChTotalCurso = document.getElementById('chTotalCurso');
+const inputBolsaIncentivo = document.getElementById('bolsaIncentivo');
+const inputChDisciplina = document.getElementById('chDisciplina');
+const selectBolsaParceira = document.getElementById('selectBolsaParceira');
+const inputDescontoPontualidade = document.getElementById('descontoPontualidade');
+const inputQtdParcelas = document.getElementById('qtdParcelas');
 
-function exportarParaExcel() {
-    const nomeCurso = selectCurso.options[selectCurso.selectedIndex].text;
+// Botões e Visuais
+const btnCalcular = document.getElementById('btnCalcular');
+const btnLimpar = document.getElementById('btnLimpar');
+const btnImprimir = document.getElementById('btnImprimir');
+const btnPDF = document.getElementById('btnPDF');
+const btnExcel = document.getElementById('btnExcel');
+const cardResultado = document.getElementById('cardResultado');
+const badgeStatus = document.getElementById('badgeStatus');
+const spinnerLoading = document.getElementById('spinnerLoading');
+const iconCalcular = document.getElementById('iconCalcular');
+
+// Elementos do Painel de Saída
+const resCurso = document.getElementById('resCurso');
+const resMensalidadeBase = document.getElementById('resMensalidadeBase');
+const resValorHora = document.getElementById('resValorHora');
+const resHoraComBI = document.getElementById('resHoraComBI');
+const resHorasCursar = document.getElementById('resHorasCursar');
+const resSubtotalBI = document.getElementById('resSubtotalBI');
+const resDescontoParceira = document.getElementById('resDescontoParceira');
+const resValorDP = document.getElementById('resValorDP');
+const resVlLiquido = document.getElementById('resVlLiquido');
+const resNumParcelas = document.getElementById('resNumParcelas');
+const resValorPorParcela = document.getElementById('resValorPorParcela');
+
+document.addEventListener('DOMContentLoaded', () => {
+    selectCurso.addEventListener('change', carregarDadosCurso);
+    btnCalcular.addEventListener('click', iniciarFluxoCalculo);
+    btnLimpar.addEventListener('click', limparFormulario);
+    btnImprimir.addEventListener('click', () => window.print());
+    btnPDF.addEventListener('click', exportarPDF);
+    btnExcel.addEventListener('click', exportarExcel);
+
+    // Ouvinte em tempo real para recálculo automático se mudar dados na tela
+    const inputsRealtime = [inputMensalidadeIntegral, inputChTotalCurso, inputBolsaIncentivo, inputChDisciplina, selectBolsaParceira, inputDescontoPontualidade, inputQtdParcelas];
+    inputsRealtime.forEach(input => {
+        input.addEventListener('input', () => {
+            if (formCalculadora.checkValidity()) calcularDiferenciais();
+        });
+    });
+});
+
+/**
+ * Alimenta o formulário com as constantes do curso selecionado
+ */
+function carregarDadosCurso() {
+    const dados = cursos[selectCurso.value];
+    if (!dados) return;
+
+    inputMensalidadeIntegral.value = dados.mensalidade;
+    inputChTotalCurso.value = dados.horasSemestre;
+    inputBolsaIncentivo.value = dados.bolsaIncentivo;
+    inputDescontoPontualidade.value = dados.pontualidade;
     
-    const dadosPlanilha = [
-        ["Demonstrativo de Cálculo de Mensalidade Acadêmica", ""],
-        ["", ""],
-        ["Curso Selecionado", nomeCurso],
-        ["Carga Horária Total do Curso", inputChTotalCurso.value + " horas"],
-        ["Carga Horária da Disciplina", inputChDisciplina.value + " horas"],
-        ["Valor Unitário da Hora/Aula", resValorHora.textContent],
-        ["Mensalidade Bruta da Disciplina", resMensalidadeIntegral.textContent],
-        ["Dedução de Bolsa Incentivo", resValorBolsa.textContent],
-        ["Mensalidade após Bolsa", resMensalidadeAposBolsa.textContent],
-        ["Desconto de Pontualidade", resDescontoPontualidade.textContent],
-        ["Valor Líquido da Mensalidade", resValorLiquido.textContent],
-        ["Valor Total da Disciplina (Semestre)", resValorTotalDisciplina.textContent],
-        ["Número de Parcelas", inputQtdParcelas.value],
-        ["Valor Unitário por Parcela", resValorPorParcela.textContent]];
+    // Libera os campos para edição livre
+    [inputMensalidadeIntegral, inputChTotalCurso, inputBolsaIncentivo, inputChDisciplina, selectBolsaParceira, inputDescontoPontualidade, inputQtdParcelas, btnCalcular].forEach(el => el.disabled = false);
 
-    const livroTrabalho = XLSX.utils.book_new();
-    const planilha = XLSX.utils.aoa_to_sheet(dadosPlanilha);
-    
-    planilha['!cols'] = [{ wch: 35 }, { wch: 30 }];
+    resetarPainelVisual();
+    inputChDisciplina.focus();
+}
 
-    XLSX.utils.book_append_sheet(livroTrabalho, planilha, "Demonstrativo");
-    XLSX.writeFile(livroTrabalho, `Calculo_Mensalidade_${nomeCurso.replace(/\s+/g, '_')}.xlsx`);}
+/**
+ * Aciona o feedback de loading exigido
+ */
+function iniciarFluxoCalculo() {
+    if (!formCalculadora.checkValidity()) {
+        formCalculadora.classList.add('was-validated');
+        return;
+    }
+    formCalculadora.classList.remove('was-validated');
+
+    spinnerLoading.classList.remove('d-none');
+    iconCalcular.classList.add('d-none');
+    btnCalcular.disabled = true;
+
+    setTimeout(() => {
+        calcularDiferenciais();
+        
+        spinnerLoading.classList.add('d-none');
+        iconCalcular.classList.remove('d-none');
+        btnCalcular.disabled = false;
+
+        cardResultado.classList.add('ativo');
+        cardResultado.classList.remove('opacity-75');
+        badgeStatus.textContent = "Calculado";
+        badgeStatus.className = "badge bg-success px-2 py-1";
+        [btnImprimir, btnPDF, btnExcel].forEach(btn => btn.disabled = false);
+    }, 400);
+}
+
+/**
+ * MOTOR DE REGRA DE TRÊS PROPORCIONAL DA PLANILHA
+ */
+function calcularDiferenciais() {
+    const vM_Base = parseFloat(inputMensalidadeIntegral.value) || 0;
+    const h_Semestre = parseFloat(inputChTotalCurso.value) || 1; 
+    const p_BI = parseFloat(inputBolsaIncentivo.value) || 0;
+    const h_A_Cursar = parseFloat(inputChDisciplina.value) || 0;
+    const p_Parceira = parseFloat(selectBolsaParceira.value) || 0;
+    const p_DP = parseFloat(inputDescontoPontualidade.value) || 0;
+    const n_Parcelas = parseInt(inputQtdParcelas.value) || 1;
+
+    // 1. Vl. Hora Aula (Regra de três com base na Mensalidade Integral)
+    const vlHoraAula = vM_Base / h_Semestre;
+
+    // 2. Hr Aula Com B.I
+    const hrAulaComBI = vlHoraAula * (1 - (p_BI / 100));
+
+    // 3. Valor Subtotal com B.I baseado nas Horas a Cursar informadas
+    const subtotalBI = hrAulaComBI * h_A_Cursar;
+
+    // 4. Desconto Bolsa Parceira (15% ou 60% aplicado sobre o subtotal com B.I)
+    const descontoParceira = subtotalBI * (p_Parceira / 100);
+    const subtotalAposParceira = subtotalBI - descontoParceira;
+
+    // 5. Valor DP (Desconto Pontualidade aplicado após a dedução da parceira)
+    const valorDP = subtotalAposParceira * (p_DP / 100);
+
+    // 6. Valor Líquido Final do período
+    const vlLiquido = subtotalAposParceira - valorDP;
+
+    // 7. Valor por Parcela
+    const vlPorParcela = vlLiquido / n_Parcelas;
+
+    // Renderização na Tela
+    resCurso.textContent = selectCurso.options[selectCurso.selectedIndex].text;
+    resMensalidadeBase.textContent = formatarMoeda(vM_Base);
+    resValorHora.textContent = formatarMoeda(vlHoraAula) + " /h";
+    resHoraComBI.textContent = formatarMoeda(hrAulaComBI) + " /h";
+    resHorasCursar.textContent = h_A_Cursar + " hrs";
+    resSubtotalBI.textContent = formatarMoeda(subtotalBI);
+    resDescontoParceira.textContent = `-${formatarMoeda(descontoParceira)} (${p_Parceira}%)`;
+    resValorDP.textContent = `-${formatarMoeda(valorDP)} (${p_DP}%)`;
+    resVlLiquido.textContent = formatarMoeda(vlLiquido);
+    resNumParcelas.textContent = n_Parcelas;
+    resValorPorParcela.textContent = formatarMoeda(vlPorParcela);
+}
+
+function formatarMoeda(v) {
+    return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function resetarPainelVisual() {
+    cardResultado.classList.remove('ativo');
+    cardResultado.classList.add('opacity-75');
+    badgeStatus.textContent = "Aguardando Parâmetros";
+    badgeStatus.className = "badge bg-secondary-subtle text-secondary px-2 py-1";
+    [resCurso, resMensalidadeBase, resValorHora, resHoraComBI, resHorasCursar, resSubtotalBI, resDescontoParceira, resValorDP, resVlLiquido, resNumParcelas, resValorPorParcela].forEach(el => el.textContent = "-");
+    [btnImprimir, btnPDF, btnExcel].forEach(btn => btn.disabled = true);
+}
+
+function limparFormulario() {
+    formCalculadora.reset();
+    formCalculadora.classList.remove('was-validated');
+    [inputMensalidadeIntegral, inputChTotalCurso, inputBolsaIncentivo, inputChDisciplina, selectBolsaParceira, inputDescontoPontualidade, inputQtdParcelas, btnCalcular].forEach(el => el.disabled = true);
+    resetarPainelVisual();
+}
+
+function exportarPDF() {
+    const element = document.getElementById('areaImpressao');
+    const nome = selectCurso.options[selectCurso.selectedIndex].text;
+    html2pdf().set({
+        margin: 12,
+        filename: `Calculo_Academico_${nome}.pdf`,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(element).save();
+}
+
+function exportarExcel() {
+    const nome = selectCurso.options[selectCurso.selectedIndex].text;
+    const dados = [
+        ["Relatório de Mensalidade Acadêmica por Disciplina"],
+        [],
+        ["Curso", nome],
+        ["Mensalidade Integral Base", resMensalidadeBase.textContent],
+        ["Carga Horária Matriz Semestre", inputChTotalCurso.value + " horas"],
+        ["Valor Unitário da Hora Aula", resValorHora.textContent],
+        ["Valor Hora com Bolsa Incentivo (B.I)", resHoraComBI.textContent],
+        ["Horas a Cursar Digitadas", resHorasCursar.textContent],
+        ["Subtotal Bruto com B.I", resSubtotalBI.textContent],
+        ["Dedução Bolsa Parceira", resDescontoParceira.textContent],
+        ["Valor Desconto de Pontualidade (DP)", resValorDP.textContent],
+        ["Valor Líquido Total do Período", resVlLiquido.textContent],
+        ["Número de Parcelas de Rateio", resNumParcelas.textContent],
+        ["Valor Final por Parcela", resValorPorParcela.textContent]
+    ];
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(dados);
+    ws['!cols'] = [{ wch: 38 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(wb, ws, "Cálculo");
+    XLSX.writeFile(wb, `Planilha_Calculo_${nome}.xlsx`);
+}
