@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Mensalidade por Disciplina</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+
+    <header class="navbar navbar-expand-lg navbar-dark bg-primary-dark shadow-sm mb-4">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-3" href="#">
+                <div class="logo-fvc-wrapper">
+                    <img src="LOGO FVC Parauapebas.png" alt="Logo FVC Parauapebas" class="logo-fvc">
+                </div>
+                <div>
+                    <span class="fw-bold d-block lh-1">Calculadora de Mensalidade por Disciplina</span>
+                    <small class="text-white-50 fs-7 fw-light">Sistema de cálculo acadêmico</small>
+                </div>
+            </a>
+        </div>
+    </header>
+
+    <main class="container mb-5">
+        <div class="row g-4">
+            
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100 card-rounded">
+                    <div class="card-header bg-white border-0 pt-4 px-4 d-flex align-items-center">
+                        <i class="bi bi-sliders text-primary fs-4 me-2"></i>
+                        <h5 class="card-title mb-0 text-dark fw-bold">Parâmetros de Cálculo</h5>
+                    </div>
+                    
+                    <div class="card-body px-4 pb-4">
+                        <form id="formCalculadora" novalidate>
+                            
+                            <div class="mb-3">
+                                <label for="selectCurso" class="form-label fw-semibold"><i class="bi bi-book me-1 text-primary"></i> Selecione o Curso</label>
+                                <select id="selectCurso" class="form-select form-select-lg" required>
+                                    <option value="" selected disabled>Escolha um curso...</option>
+                                    <option value="enfermagem">Enfermagem</option>
+                                    <option value="fonoaudiologia">Fonoaudiologia</option>
+                                    <option value="psicologia">Psicologia</option>
+                                    <option value="medicinaVeterinaria">Medicina Veterinária</option>
+                                    <option value="odontologia">Odontologia</option>
+                                    <option value="nutricao">Nutrição</option>
+                                </select>
+                                <div class="invalid-feedback">Por favor, selecione um curso.</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="chTotalCurso" class="form-label fw-semibold"><i class="bi bi-clock-history me-1 text-primary"></i> CH Total do Curso (horas)</label>
+                                    <input type="number" id="chTotalCurso" class="form-control" min="1" placeholder="Ex: 4000" required>
+                                    <div class="invalid-feedback">Insira um valor maior que zero.</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="chDisciplina" class="form-label fw-semibold"><i class="bi bi-clock me-1 text-primary"></i> CH da Disciplina (horas)</label>
+                                    <input type="number" id="chDisciplina" class="form-control" min="1" placeholder="Ex: 80" required>
+                                    <div class="invalid-feedback">Insira a carga horária da disciplina.</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="qtdParcelas" class="form-label fw-semibold"><i class="bi bi-calendar-range me-1 text-primary"></i> Qtd. de Parcelas</label>
+                                    <input type="number" id="qtdParcelas" class="form-control" min="1" max="12" placeholder="Ex: 6" required>
+                                    <div class="invalid-feedback">Informe as parcelas (1 a 12).</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="mensalidadeIntegral" class="form-label fw-semibold"><i class="bi bi-cash me-1 text-primary"></i> Mensalidade Integral (R$)</label>
+                                    <input type="number" id="mensalidadeIntegral" class="form-control" step="0.01" min="0" placeholder="0,00" required>
+                                    <div class="invalid-feedback">Insira o valor da mensalidade.</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="bolsaIncentivo" class="form-label fw-semibold"><i class="bi bi-percent me-1 text-primary"></i> Bolsa Incentivo (%)</label>
+                                    <input type="number" id="bolsaIncentivo" class="form-control" min="0" max="100" step="0.1" placeholder="0" required>
+                                    <div class="invalid-feedback">Insira uma porcentagem de 0 a 100.</div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="descontoPontualidade" class="form-label fw-semibold"><i class="bi bi-lightning me-1 text-primary"></i> Desc. Pontualidade (%)</label>
+                                    <input type="number" id="descontoPontualidade" class="form-control" min="0" max="100" step="0.1" placeholder="0" required>
+                                    <div class="invalid-feedback">Insira uma porcentagem de 0 a 100.</div>
+                                </div>
+                            </div>
+
+                            <div id="mensagemErro" class="alert alert-danger d-none mt-3" role="alert"></div>
+
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="button" id="btnCalcular" class="btn btn-primary flex-grow-1 py-2 fw-bold">
+                                    <span id="spinnerLoading" class="spinner-border spinner-border-sm d-none me-2" role="status" aria-hidden="true"></span>
+                                    <i class="bi bi-calculator me-1" id="iconCalcular"></i> Calcular
+                                </button>
+                                <button type="button" id="btnLimpar" class="btn btn-outline-secondary px-3 py-2 fw-bold">
+                                    <i class="bi bi-trash"></i> Limpar
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100 card-rounded bg-white opacity-75" id="cardResultado">
+                    <div class="card-header bg-white border-0 pt-4 px-4 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-file-earmark-bar-graph text-success fs-4 me-2"></i>
+                            <h5 class="card-title mb-0 text-dark fw-bold">Demonstrativo Financeiro</h5>
+                        </div>
+                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1" id="badgeStatus">Aguardando Cálculo</span>
+                    </div>
+
+                    <div class="card-body px-4 pb-4 d-flex flex-column justify-content-between">
+                        <div class="table-responsive" id="areaImpressao">
+                            <table class="table table-sm table-borderless align-middle mb-4">
+                                <tbody>
+                                    <tr class="border-bottom">
+                                        <td class="text-muted py-2"><i class="bi bi-bookmark text-primary me-2"></i>Curso</td>
+                                        <td class="text-end fw-bold py-2 text-primary" id="resCurso">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted py-2"><i class="bi bi-hash text-muted me-2"></i>CH Total do Curso / Disciplina</td>
+                                        <td class="text-end fw-semibold py-2"><span id="resChCurso">-</span> h / <span id="resChDisciplina">-</span> h</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="text-muted py-2"><i class="bi bi-tag text-muted me-2"></i>Valor Unitário da Hora/Aula</td>
+                                        <td class="text-end fw-semibold py-2" id="resValorHora">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted py-2"><i class="bi bi-cash-stack text-muted me-2"></i>Mensalidade Integral Base</td>
+                                        <td class="text-end fw-semibold py-2" id="resMensalidadeIntegral">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-muted py-2 text-danger"><i class="bi bi-arrow-down-circle text-danger me-2"></i>Bolsa Incentivo Aplicada</td>
+                                        <td class="text-end text-danger fw-semibold py-2" id="resValorBolsa">-</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="text-muted py-2"><i class="bi bi-wallet2 text-muted me-2"></i>Mensalidade após Bolsa</td>
+                                        <td class="text-end fw-semibold py-2" id="resMensalidadeAposBolsa">-</td>
+                                    </tr>
+                                    <tr class="border-bottom">
+                                        <td class="text-muted py-2 text-success"><i class="bi bi-percent text-success me-2"></i>Desconto de Pontualidade</td>
+                                        <td class="text-end text-success fw-semibold py-2" id="resDescontoPontualidade">-</td>
+                                    </tr>
+                                    <tr class="table-primary-light border-bottom">
+                                        <td class="py-2 fw-bold text-dark"><i class="bi bi-currency-dollar text-primary me-2"></i>Valor Líquido da Mensalidade</td>
+                                        <td class="text-end fw-bold text-primary fs-5 py-2" id="resValorLiquido">-</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td class="py-2 fw-semibold text-muted"><i class="bi bi-calculator-fill text-muted me-2"></i>Valor Total da Disciplina (Semestre)</td>
+                                        <td class="text-end fw-bold text-dark py-2" id="resValorTotalDisciplina">-</td>
+                                    </tr>
+                                    <tr class="bg-light">
+                                        <td class="py-2 fw-semibold text-muted"><i class="bi bi-credit-card text-muted me-2"></i>Valor por Parcela (<span id="resNumParcelas">-</span>x)</td>
+                                        <td class="text-end fw-bold text-dark py-2" id="resValorPorParcela">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white-50 text-center py-3 fixed-bottom border-top border-secondary shadow-lg">
+        <div class="container fs-7">
+            <span class="fw-semibold text-light text-uppercase tracking-wider">Sistema de Cálculo de Mensalidades Acadêmicas</span>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
